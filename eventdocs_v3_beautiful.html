@@ -1,0 +1,636 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --indigo:#534AB7;--indigo-lt:#EEEDFE;--indigo-md:#7F77DD;--indigo-dk:#3C3489;
+  --teal:#1D9E75;--teal-lt:#E1F5EE;--teal-md:#5DCAA5;--teal-dk:#0F6E56;
+  --amber:#BA7517;--amber-lt:#FAEEDA;--amber-md:#EF9F27;
+  --coral:#993C1D;--coral-lt:#FAECE7;--coral-md:#D85A30;
+  --green:#3B6D11;--green-lt:#EAF3DE;--green-md:#97C459;
+  --gray-lt:#F1EFE8;--gray-md:#B4B2A9;--gray-dk:#5F5E5A;
+}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary);background:var(--color-background-tertiary)}
+
+.app{display:flex;flex-direction:column;min-height:720px}
+
+.topbar{background:var(--color-background-primary);border-bottom:0.5px solid var(--color-border-tertiary);padding:0 20px;display:flex;align-items:center;gap:12px;height:56px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.brand-icon{width:30px;height:30px;background:#EEEDFE;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.brand-icon i{font-size:16px;color:#534AB7}
+.brand-name{font-size:15px;font-weight:500;color:var(--color-text-primary)}
+.brand-name span{color:#7F77DD}
+
+.search-wrap{flex:1;position:relative;max-width:380px}
+.search-wrap i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--color-text-tertiary);pointer-events:none}
+.search-wrap input{width:100%;height:34px;padding:0 10px 0 32px;border:0.5px solid var(--color-border-tertiary);border-radius:20px;background:var(--color-background-secondary);font-size:13px;color:var(--color-text-primary)}
+.search-wrap input:focus{outline:none;border-color:#AFA9EC;background:var(--color-background-primary)}
+
+.view-toggle{display:flex;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-radius:20px;padding:3px;gap:2px}
+.vt-btn{padding:4px 14px;border-radius:16px;font-size:12px;border:none;background:transparent;cursor:pointer;color:var(--color-text-secondary);display:flex;align-items:center;gap:5px;transition:all .15s}
+.vt-btn.on{background:var(--color-background-primary);color:#534AB7;font-weight:500;border:0.5px solid var(--color-border-tertiary)}
+.vt-btn:not(.on):hover{color:var(--color-text-primary)}
+
+.new-btn{height:34px;padding:0 16px;background:#7F77DD;color:#fff;border:none;border-radius:20px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;flex-shrink:0}
+.new-btn:hover{background:#534AB7}
+.new-btn i{font-size:14px}
+
+.body{display:flex;flex:1}
+
+.sidebar{width:220px;flex-shrink:0;background:var(--color-background-primary);border-right:0.5px solid var(--color-border-tertiary);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-hdr{padding:16px 16px 8px;display:flex;align-items:center;justify-content:space-between}
+.sidebar-hdr span{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.07em}
+.sidebar-add{width:22px;height:22px;border:0.5px solid var(--color-border-secondary);border-radius:6px;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-text-secondary)}
+.sidebar-add:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+
+.ev-item{padding:8px 12px;cursor:pointer;border-radius:0}
+.ev-item:hover .ev-card{border-color:var(--color-border-secondary)}
+.ev-card{border:0.5px solid var(--color-border-tertiary);border-radius:10px;padding:10px 12px;background:var(--color-background-primary);transition:border-color .15s}
+.ev-item.active .ev-card{border-color:#AFA9EC;background:#EEEDFE}
+.ev-card-top{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.ev-avatar{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.ev-name{font-size:13px;font-weight:500;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--color-text-primary)}
+.ev-item.active .ev-name{color:#3C3489}
+.ev-card-meta{display:flex;align-items:center;justify-content:space-between}
+.ev-file-count{font-size:11px;color:var(--color-text-tertiary)}
+.ev-status-dot{width:7px;height:7px;border-radius:50%}
+.ev-bar{height:2px;border-radius:2px;background:var(--color-border-tertiary);margin-top:6px;overflow:hidden}
+.ev-bar-fill{height:100%;border-radius:2px;transition:width .3s}
+
+.sub-items{padding:0 8px 4px 8px}
+.sub-item{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:8px;cursor:pointer;font-size:12px;color:var(--color-text-secondary)}
+.sub-item:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.sub-item.active{background:#E1F5EE;color:#0F6E56;font-weight:500}
+.sub-item i{font-size:13px;flex-shrink:0}
+.sub-del{margin-left:auto;opacity:0;font-size:13px;padding:1px 3px;border-radius:4px;cursor:pointer}
+.sub-item:hover .sub-del{opacity:1}
+.sub-del:hover{color:#E24B4A}
+
+.main{flex:1;min-width:0;overflow-y:auto;padding:20px}
+
+.empty-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:14px;text-align:center}
+.empty-icon-wrap{width:64px;height:64px;border-radius:16px;background:#EEEDFE;display:flex;align-items:center;justify-content:center}
+.empty-icon-wrap i{font-size:28px;color:#7F77DD}
+.empty-wrap p{font-size:14px;color:var(--color-text-secondary)}
+
+.page-hdr{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;gap:12px}
+.page-title{font-size:20px;font-weight:500;margin-bottom:3px}
+.page-sub{font-size:12px;color:var(--color-text-secondary)}
+.pbar{height:4px;border-radius:4px;background:var(--color-border-tertiary);margin-top:8px;width:140px}
+.pbar-fill{height:100%;border-radius:4px;background:#7F77DD;transition:width .3s}
+.hdr-actions{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.status-pill{padding:5px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:0.5px solid transparent;font-weight:500}
+.sp-pending{background:#F1EFE8;color:#5F5E5A;border-color:#D3D1C7}
+.sp-progress{background:#FAEEDA;color:#854F0B;border-color:#FAC775}
+.sp-done{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}
+.ic-btn{width:34px;height:34px;border:0.5px solid var(--color-border-tertiary);border-radius:10px;background:var(--color-background-primary);cursor:pointer;color:var(--color-text-secondary);display:flex;align-items:center;justify-content:center;font-size:16px}
+.ic-btn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px}
+.stat-box{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:14px 16px;display:flex;align-items:center;gap:12px}
+.stat-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon i{font-size:18px}
+.stat-lbl{font-size:11px;color:var(--color-text-tertiary);margin-bottom:2px}
+.stat-val{font-size:20px;font-weight:500}
+
+.sub-tabs-row{display:flex;align-items:center;gap:8px;margin-bottom:16px;flex-wrap:wrap}
+.stab{padding:5px 13px;border-radius:20px;border:0.5px solid var(--color-border-tertiary);font-size:12px;cursor:pointer;background:var(--color-background-secondary);color:var(--color-text-secondary);transition:all .15s}
+.stab:hover{border-color:var(--color-border-secondary);color:var(--color-text-primary)}
+.stab.on{background:#EEEDFE;border-color:#AFA9EC;color:#3C3489;font-weight:500}
+.stab.add{border-style:dashed;color:var(--color-text-tertiary)}
+.stab.add:hover{color:var(--color-text-primary)}
+
+.section-card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.sec-hdr-left{display:flex;align-items:center;gap:8px}
+.sec-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center}
+.sec-icon i{font-size:14px}
+.sec-title{font-size:13px;font-weight:500}
+.sec-count{font-size:11px;color:var(--color-text-tertiary);background:var(--color-background-secondary);padding:2px 8px;border-radius:10px;border:0.5px solid var(--color-border-tertiary)}
+
+.upload-area{margin:14px;border:1.5px dashed var(--color-border-secondary);border-radius:10px;padding:18px;text-align:center;cursor:pointer;transition:background .15s}
+.upload-area:hover,.upload-area.dov{background:var(--color-background-secondary)}
+.upload-area input{display:none}
+.upload-area i{font-size:22px;color:var(--color-text-tertiary);display:block;margin-bottom:6px}
+.upload-area p{font-size:12px;color:var(--color-text-secondary)}
+.upload-area small{font-size:11px;color:var(--color-text-tertiary)}
+
+.file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(0,1fr));gap:0}
+.file-row{display:flex;align-items:center;gap:10px;padding:10px 16px;cursor:pointer;border-top:0.5px solid var(--color-border-tertiary)}
+.file-row:hover{background:var(--color-background-secondary)}
+.file-thumb{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.file-thumb i{font-size:17px}
+.file-inf{flex:1;min-width:0}
+.file-nm{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:400}
+.file-mt{font-size:11px;color:var(--color-text-tertiary);margin-top:1px}
+.file-acts{display:flex;align-items:center;gap:2px;opacity:0}
+.file-row:hover .file-acts{opacity:1}
+.fa-btn{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--color-text-tertiary)}
+.fa-btn:hover{background:var(--color-border-tertiary);color:var(--color-text-primary)}
+.fa-del:hover{color:#E24B4A}
+
+.drive-section{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.drive-hdr{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.drive-hdr-left{display:flex;align-items:center;gap:8px}
+.drive-badge{display:flex;align-items:center;gap:4px;font-size:11px;color:#3B6D11;background:#EAF3DE;padding:3px 9px;border-radius:10px;border:0.5px solid #C0DD97}
+.drive-browse{height:28px;padding:0 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:transparent;cursor:pointer;font-size:12px;color:var(--color-text-secondary)}
+.drive-browse:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.drive-file-row{display:flex;align-items:center;gap:10px;padding:9px 16px;border-top:0.5px solid var(--color-border-tertiary)}
+.drive-file-row:hover{background:var(--color-background-secondary)}
+.drive-thumb{width:30px;height:30px;border-radius:8px;background:#EAF3DE;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.drive-thumb i{font-size:15px;color:#3B6D11}
+.drive-import{height:26px;padding:0 12px;border:0.5px solid var(--color-border-secondary);border-radius:8px;background:transparent;cursor:pointer;font-size:11px;color:var(--color-text-secondary);white-space:nowrap}
+.drive-import:hover{background:#EAF3DE;color:#3B6D11;border-color:#C0DD97}
+.imported-tag{font-size:11px;color:#3B6D11;background:#EAF3DE;padding:2px 9px;border-radius:10px;border:0.5px solid #C0DD97}
+.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--color-border-tertiary);border-top-color:#7F77DD;border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.tl-wrap{padding:4px 0}
+.tl-yr{font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:.07em;padding:14px 0 8px 52px}
+.tl-row{display:flex;align-items:flex-start;gap:0;margin-bottom:4px}
+.tl-dt{width:48px;text-align:right;padding-top:14px;font-size:11px;color:var(--color-text-tertiary);flex-shrink:0;line-height:1.3}
+.tl-spine{width:32px;display:flex;flex-direction:column;align-items:center;flex-shrink:0}
+.tl-dot{width:12px;height:12px;border-radius:50%;margin-top:12px;border:2px solid var(--color-background-primary);flex-shrink:0}
+.tl-line{width:2px;flex:1;min-height:24px;background:var(--color-border-tertiary);margin-top:2px}
+.tl-card{flex:1;min-width:0;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:14px;padding:14px 16px;margin-bottom:12px;cursor:pointer;transition:border-color .15s}
+.tl-card:hover{border-color:var(--color-border-secondary)}
+.tl-card-hdr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.tl-ev-avatar{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tl-ev-avatar i{font-size:16px}
+.tl-title{font-size:14px;font-weight:500;flex:1}
+.tl-status{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500;border:0.5px solid transparent;white-space:nowrap}
+.tl-chips{display:flex;flex-wrap:wrap;gap:6px}
+.tl-chip{padding:3px 10px;border-radius:20px;font-size:11px;background:var(--color-background-secondary);color:var(--color-text-secondary);border:0.5px solid var(--color-border-tertiary)}
+.tl-meta-row{display:flex;align-items:center;gap:14px;margin-bottom:8px;font-size:12px;color:var(--color-text-secondary)}
+.tl-meta-row i{font-size:13px;vertical-align:-1px;margin-right:3px}
+
+.modal-bg{min-height:500px;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;border-radius:14px;margin-top:12px}
+.modal{background:var(--color-background-primary);border-radius:16px;padding:24px;width:340px;border:0.5px solid var(--color-border-secondary)}
+.modal h2{font-size:16px;font-weight:500;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.modal h2 i{font-size:18px;color:#7F77DD}
+.modal label{font-size:12px;color:var(--color-text-secondary);display:block;margin-bottom:5px}
+.modal input,.modal select{width:100%;padding:8px 11px;border:0.5px solid var(--color-border-tertiary);border-radius:10px;background:var(--color-background-secondary);font-size:13px;color:var(--color-text-primary);margin-bottom:14px}
+.modal input:focus,.modal select:focus{outline:none;border-color:#AFA9EC}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}
+.btn-go{padding:7px 20px;background:#7F77DD;color:#fff;border:none;border-radius:10px;font-size:13px;cursor:pointer}
+.btn-go:hover{background:#534AB7}
+.btn-no{padding:7px 14px;background:transparent;border:0.5px solid var(--color-border-tertiary);border-radius:10px;font-size:13px;cursor:pointer;color:var(--color-text-secondary)}
+.btn-no:hover{background:var(--color-background-secondary)}
+
+.prev-bg{min-height:600px;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;border-radius:14px;margin-top:12px;padding:20px}
+.prev-box{background:var(--color-background-primary);border-radius:16px;border:0.5px solid var(--color-border-secondary);width:100%;max-width:560px;overflow:hidden}
+.prev-hdr{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:0.5px solid var(--color-border-tertiary)}
+.prev-hdr span{flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prev-body{padding:20px;min-height:280px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+.prev-img{max-width:100%;max-height:300px;border-radius:10px;object-fit:contain}
+.prev-pdf{width:100%;height:320px;border:none;border-radius:10px}
+.prev-ph{text-align:center;color:var(--color-text-tertiary)}
+.prev-ph i{font-size:44px;display:block;margin-bottom:10px}
+
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+</style>
+
+<h2 class="sr-only">EventDocs — beautiful event and document manager with file preview, Drive sync, and timeline</h2>
+
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-icon"><i class="ti ti-folder-open" aria-hidden="true"></i></div>
+      <div class="brand-name">Event<span>Docs</span></div>
+    </div>
+    <div class="search-wrap">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input id="srch" type="text" placeholder="Search files…" oninput="doSearch(this.value)">
+    </div>
+    <div style="flex:1"></div>
+    <div class="view-toggle">
+      <button class="vt-btn on" id="vb-events" onclick="setView('events')"><i class="ti ti-layout-list" aria-hidden="true"></i>Events</button>
+      <button class="vt-btn" id="vb-timeline" onclick="setView('timeline')"><i class="ti ti-timeline" aria-hidden="true"></i>Timeline</button>
+    </div>
+    <button class="new-btn" onclick="openModal('ev')"><i class="ti ti-plus" aria-hidden="true"></i>New event</button>
+  </div>
+  <div class="body">
+    <div class="sidebar" id="sidebarEl">
+      <div class="sidebar-hdr">
+        <span>Events</span>
+        <button class="sidebar-add" onclick="openModal('ev')" aria-label="Add event"><i class="ti ti-plus" style="font-size:13px" aria-hidden="true"></i></button>
+      </div>
+      <div id="tabList"></div>
+    </div>
+    <div class="main" id="mainEl">
+      <div id="emptyEl"></div>
+      <div id="evView" style="display:none"></div>
+      <div id="tlView" style="display:none"></div>
+      <div id="srchView" style="display:none"></div>
+    </div>
+  </div>
+</div>
+<div id="modalRoot"></div>
+<div id="prevRoot"></div>
+
+<script>
+const S={evs:[],activeEv:null,activeSub:null,view:'events',driveLoaded:false,driveLoading:false};
+const uid=()=>Math.random().toString(36).slice(2,9);
+
+const EV_COLORS=[
+  {bg:'#EEEDFE',ic:'#7F77DD'},{bg:'#E1F5EE',ic:'#1D9E75'},{bg:'#FAECE7',ic:'#D85A30'},
+  {bg:'#FBEAF0',ic:'#D4537E'},{bg:'#FAEEDA',ic:'#BA7517'},{bg:'#E6F1FB',ic:'#378ADD'}
+];
+const EV_ICONS=['ti-calendar-event','ti-plane','ti-heart','ti-star','ti-briefcase','ti-gift','ti-camera','ti-music'];
+
+function evColor(idx){return EV_COLORS[idx%EV_COLORS.length]}
+function evIcon(idx){return EV_ICONS[idx%EV_ICONS.length]}
+
+const FILE_TYPES={
+  photo:{exts:['jpg','jpeg','png','gif','webp','svg'],icon:'ti-photo',bg:'#FBEAF0',ic:'#D4537E'},
+  pdf:{exts:['pdf'],icon:'ti-file-type-pdf',bg:'#FAECE7',ic:'#D85A30'},
+  doc:{exts:['doc','docx'],icon:'ti-file-type-doc',bg:'#E6F1FB',ic:'#378ADD'},
+  xls:{exts:['xls','xlsx'],icon:'ti-file-type-xls',bg:'#EAF3DE',ic:'#3B6D11'},
+  ppt:{exts:['ppt','pptx'],icon:'ti-file-type-ppt',bg:'#FAEEDA',ic:'#BA7517'},
+  zip:{exts:['zip','rar'],icon:'ti-file-zip',bg:'#F1EFE8',ic:'#5F5E5A'},
+  video:{exts:['mp4','mkv','mov'],icon:'ti-movie',bg:'#EEEDFE',ic:'#534AB7'},
+  default:{exts:[],icon:'ti-file',bg:'#F1EFE8',ic:'#888780'}
+};
+function fType(name){
+  const ext=(name||'').split('.').pop().toLowerCase();
+  return Object.values(FILE_TYPES).find(t=>t.exts.includes(ext))||FILE_TYPES.default;
+}
+function isImg(n){return/\.(jpg|jpeg|png|gif|webp|svg)$/i.test(n||'')}
+function isPdf(n){return/\.pdf$/i.test(n||'')}
+function fmtSz(b){if(!b)return'–';if(b<1024)return b+'B';if(b<1048576)return(b/1024).toFixed(1)+'KB';return(b/1048576).toFixed(1)+'MB'}
+function fmtDt(ts){return new Date(ts).toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}
+function fmtDtSh(ts){return new Date(ts).toLocaleDateString('en-IN',{day:'2-digit',month:'short'})}
+function statusCfg(s){
+  if(s==='done')return{cls:'sp-done',lbl:'✓ Completed',dot:'#639922',tlCls:'sp-done'};
+  if(s==='progress')return{cls:'sp-progress',lbl:'⟳ In progress',dot:'#BA7517',tlCls:'sp-progress'};
+  return{cls:'sp-pending',lbl:'○ Pending',dot:'#B4B2A9',tlCls:'sp-pending'};
+}
+
+const DRIVE_FILES=[
+  {id:'gd1',name:'Wedding_budget_2025.xlsx',size:48200,mtime:'10 Mar',icon:'ti-file-type-xls',bg:'#EAF3DE',ic:'#3B6D11'},
+  {id:'gd2',name:'Venue_contract_signed.pdf',size:312000,mtime:'14 Mar',icon:'ti-file-type-pdf',bg:'#FAECE7',ic:'#D85A30'},
+  {id:'gd3',name:'Guest_seating_plan.docx',size:89000,mtime:'18 Mar',icon:'ti-file-type-doc',bg:'#E6F1FB',ic:'#378ADD'},
+  {id:'gd4',name:'Photographer_portfolio.pdf',size:4100000,mtime:'20 Mar',icon:'ti-file-type-pdf',bg:'#FAECE7',ic:'#D85A30'},
+  {id:'gd5',name:'Catering_menu_final.pdf',size:156000,mtime:'22 Mar',icon:'ti-file-type-pdf',bg:'#FAECE7',ic:'#D85A30'},
+  {id:'gd6',name:'Mehendi_ceremony_plan.docx',size:64000,mtime:'25 Mar',icon:'ti-file-type-doc',bg:'#E6F1FB',ic:'#378ADD'},
+];
+
+function setView(v){
+  S.view=v;
+  document.getElementById('vb-events').classList.toggle('on',v==='events');
+  document.getElementById('vb-timeline').classList.toggle('on',v==='timeline');
+  document.getElementById('srch').value='';
+  render();
+}
+function selEv(id){S.activeEv=id;S.activeSub=null;S.view='events';S.driveLoaded=false;S.driveLoading=false;document.getElementById('srch').value='';render();}
+function selSub(sid){S.activeSub=sid;render();}
+function cycleStatus(id){
+  const ev=S.evs.find(e=>e.id===id);if(!ev)return;
+  const o=['pending','progress','done'];ev.status=o[(o.indexOf(ev.status)+1)%3];render();
+}
+function delEv(id,e){e.stopPropagation();S.evs=S.evs.filter(ev=>ev.id!==id);if(S.activeEv===id){S.activeEv=S.evs[0]?.id||null;S.activeSub=null;}render();}
+function delSub(eid,sid,e){e.stopPropagation();const ev=S.evs.find(e=>e.id===eid);if(!ev)return;ev.subs=ev.subs.filter(s=>s.id!==sid);if(S.activeSub===sid)S.activeSub=null;render();}
+
+function openModal(type,pid){
+  const isEv=type==='ev';
+  document.getElementById('modalRoot').innerHTML=`
+  <div class="modal-bg" onclick="if(event.target===this)closeModal()">
+    <div class="modal">
+      <h2><i class="ti ${isEv?'ti-calendar-plus':'ti-folder-plus'}" aria-hidden="true"></i>${isEv?'New event':'New sub-event'}</h2>
+      <label>${isEv?'Event':'Sub-event'} title</label>
+      <input id="mN" placeholder="${isEv?'e.g. Delhi wedding trip':'e.g. Flight booking'}" autofocus>
+      ${isEv?`<label>Initial status</label><select id="mS"><option value="pending">Pending</option><option value="progress">In progress</option><option value="done">Completed</option></select>`:''}
+      <div class="modal-footer">
+        <button class="btn-no" onclick="closeModal()">Cancel</button>
+        <button class="btn-go" onclick="${isEv?'mkEv()':pid?`mkSub('${pid}')`:''}">Create</button>
+      </div>
+    </div>
+  </div>`;
+  setTimeout(()=>{const i=document.getElementById('mN');if(i)i.focus();},30);
+}
+function closeModal(){document.getElementById('modalRoot').innerHTML='';}
+function mkEv(){
+  const name=document.getElementById('mN').value.trim();
+  if(!name)return;
+  const status=document.getElementById('mS').value;
+  const idx=S.evs.length;
+  S.evs.push({id:uid(),name,status,subs:[],files:[],created:Date.now(),colorIdx:idx});
+  S.activeEv=S.evs[S.evs.length-1].id;S.activeSub=null;S.view='events';
+  closeModal();render();
+}
+function mkSub(pid){
+  const name=document.getElementById('mN').value.trim();if(!name)return;
+  const ev=S.evs.find(e=>e.id===pid);if(!ev)return;
+  const sub={id:uid(),name,files:[]};ev.subs.push(sub);S.activeSub=sub.id;
+  closeModal();render();
+}
+
+function addFiles(files,eid,sid){
+  const ev=S.evs.find(e=>e.id===eid);if(!ev)return;
+  const t=sid?ev.subs.find(s=>s.id===sid):ev;if(!t)return;
+  files.forEach(f=>{t.files.push({id:uid(),name:f.name,size:f.size,uploaded:Date.now(),objUrl:URL.createObjectURL(f)});});
+  render();
+}
+function hFileInput(inp,eid,sid){addFiles(Array.from(inp.files),eid,sid);inp.value='';}
+function hDrop(e,eid,sid){e.preventDefault();e.currentTarget.classList.remove('dov');addFiles(Array.from(e.dataTransfer.files),eid,sid);}
+function delFile(eid,sid,fid){
+  const ev=S.evs.find(e=>e.id===eid);if(!ev)return;
+  const t=sid?ev.subs.find(s=>s.id===sid):ev;if(!t)return;
+  t.files=t.files.filter(f=>f.id!==fid);render();
+}
+function openPreview(f){
+  let body='';
+  if(f.objUrl){
+    if(isImg(f.name))body=`<img class="prev-img" src="${f.objUrl}" alt="${f.name}">`;
+    else if(isPdf(f.name))body=`<iframe class="prev-pdf" src="${f.objUrl}" title="PDF"></iframe>`;
+    else body=`<div class="prev-ph"><i class="ti ${fType(f.name).icon}" aria-hidden="true"></i><p>${f.name}</p><p style="font-size:11px;margin-top:4px;color:var(--color-text-tertiary)">No preview for this file type</p></div>`;
+  }else if(f.driveUrl){
+    body=`<div class="prev-ph"><i class="ti ti-brand-google-drive" style="color:#3B6D11" aria-hidden="true"></i><p style="font-weight:500">${f.name}</p><p style="font-size:11px;margin-top:4px">From Google Drive</p><a href="${f.driveUrl}" style="margin-top:12px;display:inline-block;padding:7px 18px;background:#7F77DD;color:#fff;border-radius:10px;font-size:13px;text-decoration:none">Open in Drive</a></div>`;
+  }else{
+    body=`<div class="prev-ph"><i class="ti ${fType(f.name).icon}" aria-hidden="true"></i><p>${f.name}</p></div>`;
+  }
+  const ft=fType(f.name);
+  document.getElementById('prevRoot').innerHTML=`
+  <div class="prev-bg" onclick="if(event.target===this)closePrev()">
+    <div class="prev-box">
+      <div class="prev-hdr">
+        <div style="width:26px;height:26px;border-radius:7px;background:${ft.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ${ft.icon}" style="font-size:14px;color:${ft.ic}" aria-hidden="true"></i></div>
+        <span>${f.name}</span>
+        <span style="font-size:11px;color:var(--color-text-tertiary);flex-shrink:0">${fmtSz(f.size)}</span>
+        <button class="ic-btn" onclick="closePrev()" aria-label="Close" style="width:28px;height:28px;flex-shrink:0"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+      <div class="prev-body">${body}</div>
+    </div>
+  </div>`;
+}
+function closePrev(){document.getElementById('prevRoot').innerHTML='';}
+
+function loadDrive(eid,sid){S.driveLoading=true;S.driveLoaded=false;render();setTimeout(()=>{S.driveLoading=false;S.driveLoaded=true;render();},1200);}
+function importDrive(gdf,eid,sid){
+  const ev=S.evs.find(e=>e.id===eid);if(!ev)return;
+  const t=sid?ev.subs.find(s=>s.id===sid):ev;if(!t)return;
+  if(t.files.find(f=>f.id===gdf.id))return;
+  t.files.push({id:gdf.id,name:gdf.name,size:gdf.size,uploaded:Date.now(),driveUrl:'https://drive.google.com',fromDrive:true});
+  render();
+}
+
+function doSearch(q){
+  q=q.trim().toLowerCase();
+  ['emptyEl','evView','tlView'].forEach(id=>document.getElementById(id).style.display='none');
+  const sv=document.getElementById('srchView');
+  if(!q){sv.style.display='none';render();return;}
+  sv.style.display='block';
+  let res=[];
+  S.evs.forEach(ev=>{
+    ev.files.forEach(f=>{if(f.name.toLowerCase().includes(q))res.push({file:f,path:ev.name,eid:ev.id,sid:null});});
+    ev.subs.forEach(sub=>{sub.files.forEach(f=>{if(f.name.toLowerCase().includes(q))res.push({file:f,path:ev.name+' › '+sub.name,eid:ev.id,sid:sub.id});});});
+  });
+  if(!res.length){
+    sv.innerHTML=`<div class="empty-wrap" style="min-height:280px"><div class="empty-icon-wrap"><i class="ti ti-search" aria-hidden="true"></i></div><p>No files match "<strong>${q}</strong>"</p></div>`;
+    return;
+  }
+  sv.innerHTML=`<div class="section-card">${res.map(r=>{const ft=fType(r.file.name);return`
+    <div class="file-row" onclick="goTo('${r.eid}','${r.sid||''}')">
+      <div class="file-thumb" style="background:${ft.bg}"><i class="ti ${ft.icon}" style="color:${ft.ic}" aria-hidden="true"></i></div>
+      <div class="file-inf">
+        <div class="file-nm">${r.file.name} ${r.file.fromDrive?'<i class="ti ti-brand-google-drive" style="font-size:11px;color:#3B6D11;vertical-align:-1px" aria-hidden="true"></i>':''}</div>
+        <div class="file-mt">${r.path} · ${fmtSz(r.file.size)}</div>
+      </div>
+      <i class="ti ti-arrow-right" style="font-size:14px;color:var(--color-text-tertiary)" aria-hidden="true"></i>
+    </div>`;}).join('')}</div>`;
+}
+function goTo(eid,sid){S.activeEv=eid;S.activeSub=sid||null;S.view='events';document.getElementById('srch').value='';render();}
+
+function renderSidebar(){
+  const tl=document.getElementById('tabList');
+  if(!S.evs.length){tl.innerHTML='';return;}
+  tl.innerHTML=S.evs.map((ev,idx)=>{
+    const isA=ev.id===S.activeEv&&S.view==='events';
+    const c=evColor(ev.colorIdx??idx);
+    const sc=statusCfg(ev.status);
+    const totalF=ev.files.length+ev.subs.reduce((a,s)=>a+s.files.length,0);
+    const pct=ev.subs.length?Math.round(ev.subs.filter(s=>s.files.length>0).length/ev.subs.length*100):ev.status==='done'?100:ev.status==='progress'?50:0;
+    const subs=isA&&ev.subs.length?`<div class="sub-items">${ev.subs.map(s=>{
+      const isSA=s.id===S.activeSub;
+      return`<div class="sub-item${isSA?' active':''}" onclick="selSub('${s.id}')">
+        <i class="ti ti-corner-down-right" aria-hidden="true"></i>
+        <span style="flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${s.name}</span>
+        <span style="font-size:11px;color:var(--color-text-tertiary)">${s.files.length}</span>
+        <span class="sub-del" onclick="delSub('${ev.id}','${s.id}',event)" aria-label="Delete sub">×</span>
+      </div>`;}).join('')}</div>`:'';
+    return`<div class="ev-item${isA?' active':''}" onclick="selEv('${ev.id}')">
+      <div class="ev-card">
+        <div class="ev-card-top">
+          <div class="ev-avatar" style="background:${c.bg}"><i class="ti ${evIcon(ev.colorIdx??idx)}" style="font-size:14px;color:${c.ic}" aria-hidden="true"></i></div>
+          <span class="ev-name">${ev.name}</span>
+          <span class="del-x" onclick="delEv('${ev.id}',event)" aria-label="Delete" style="font-size:14px;color:var(--color-text-tertiary);cursor:pointer;opacity:0;padding:1px 4px;border-radius:4px">×</span>
+        </div>
+        <div class="ev-card-meta">
+          <span class="ev-file-count">${totalF} file${totalF!==1?'s':''}</span>
+          <span class="ev-status-dot" style="background:${sc.dot}"></span>
+        </div>
+        <div class="ev-bar"><div class="ev-bar-fill" style="width:${pct}%;background:${c.ic}"></div></div>
+      </div>
+    </div>${subs}`;
+  }).join('');
+  document.querySelectorAll('.ev-item').forEach(item=>{
+    item.addEventListener('mouseenter',()=>{const x=item.querySelector('.del-x');if(x)x.style.opacity='1';});
+    item.addEventListener('mouseleave',()=>{const x=item.querySelector('.del-x');if(x)x.style.opacity='0';});
+  });
+}
+
+function renderEvView(){
+  const ev=S.evs.find(e=>e.id===S.activeEv);
+  const div=document.getElementById('evView');
+  if(!ev){div.style.display='none';return;}
+  div.style.display='block';
+  document.getElementById('emptyEl').style.display='none';
+  const idx=ev.colorIdx??0;
+  const c=evColor(idx);
+  const sc=statusCfg(ev.status);
+  const totalF=ev.files.length+ev.subs.reduce((a,s)=>a+s.files.length,0);
+  const pct=ev.subs.length?Math.round(ev.subs.filter(s=>s.files.length>0).length/ev.subs.length*100):ev.status==='done'?100:ev.status==='progress'?50:0;
+  const activeSub=S.activeSub?ev.subs.find(s=>s.id===S.activeSub):null;
+  const dispFiles=(activeSub||ev).files;
+  const eid=ev.id,sid=activeSub?activeSub.id:'';
+  const importedIds=new Set((activeSub||ev).files.filter(f=>f.fromDrive).map(f=>f.id));
+
+  div.innerHTML=`
+    <div class="page-hdr">
+      <div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="width:38px;height:38px;border-radius:10px;background:${c.bg};display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="ti ${evIcon(idx)}" style="font-size:20px;color:${c.ic}" aria-hidden="true"></i>
+          </div>
+          <div class="page-title">${ev.name}</div>
+        </div>
+        <div class="page-sub">Created ${fmtDt(ev.created)} · ${totalF} file${totalF!==1?'s':''} · ${ev.subs.length} sub-event${ev.subs.length!==1?'s':''}</div>
+        <div class="pbar"><div class="pbar-fill" style="width:${pct}%;background:${c.ic}"></div></div>
+      </div>
+      <div class="hdr-actions">
+        <span class="status-pill ${sc.cls}" onclick="cycleStatus('${ev.id}')" title="Click to cycle">${sc.lbl}</span>
+        <button class="ic-btn" onclick="openModal('sub','${ev.id}')" title="Add sub-event"><i class="ti ti-folder-plus" aria-hidden="true"></i></button>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-icon" style="background:#EEEDFE"><i class="ti ti-files" style="color:#7F77DD" aria-hidden="true"></i></div>
+        <div><div class="stat-lbl">Total files</div><div class="stat-val">${totalF}</div></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon" style="background:#E1F5EE"><i class="ti ti-folders" style="color:#1D9E75" aria-hidden="true"></i></div>
+        <div><div class="stat-lbl">Sub-events</div><div class="stat-val">${ev.subs.length}</div></div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-icon" style="background:#FAEEDA"><i class="ti ti-chart-pie" style="color:#BA7517" aria-hidden="true"></i></div>
+        <div><div class="stat-lbl">Progress</div><div class="stat-val">${pct}%</div></div>
+      </div>
+    </div>
+
+    ${ev.subs.length?`<div class="sub-tabs-row">
+      <span class="stab${!S.activeSub?' on':''}" onclick="selSub(null)">All files</span>
+      ${ev.subs.map(s=>`<span class="stab${S.activeSub===s.id?' on':''}" onclick="selSub('${s.id}')">${s.name} <span style="color:var(--color-text-tertiary)">(${s.files.length})</span></span>`).join('')}
+      <span class="stab add" onclick="openModal('sub','${ev.id}')"><i class="ti ti-plus" aria-hidden="true"></i> Add</span>
+    </div>`:''}
+
+    <div class="drive-section">
+      <div class="drive-hdr">
+        <div class="drive-hdr-left">
+          <div style="width:28px;height:28px;border-radius:8px;background:#EAF3DE;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-brand-google-drive" style="font-size:15px;color:#3B6D11" aria-hidden="true"></i>
+          </div>
+          <span style="font-size:13px;font-weight:500">Google Drive</span>
+          <span class="drive-badge"><i class="ti ti-circle-check" style="font-size:12px" aria-hidden="true"></i> Connected</span>
+        </div>
+        ${!S.driveLoaded&&!S.driveLoading?`<button class="drive-browse" onclick="loadDrive('${eid}','${sid}')">Browse Drive</button>`:''}
+      </div>
+      ${S.driveLoading?`<div style="display:flex;align-items:center;gap:8px;padding:14px 16px;font-size:12px;color:var(--color-text-secondary)"><span class="spinner"></span>Loading files from Google Drive…</div>`:''}
+      ${S.driveLoaded?DRIVE_FILES.map(f=>{
+        const already=importedIds.has(f.id);
+        return`<div class="drive-file-row">
+          <div class="drive-thumb" style="background:${f.bg}"><i class="ti ${f.icon}" style="color:${f.ic}" aria-hidden="true"></i></div>
+          <div class="file-inf">
+            <div class="file-nm">${f.name}</div>
+            <div class="file-mt">${fmtSz(f.size)} · ${f.mtime}</div>
+          </div>
+          ${already
+            ?`<span class="imported-tag"><i class="ti ti-circle-check" style="font-size:11px;vertical-align:-1px;margin-right:3px" aria-hidden="true"></i>Imported</span>`
+            :`<button class="drive-import" onclick="importDrive(${JSON.stringify(f).replace(/"/g,'&quot;')},'${eid}','${sid}')">Import</button>`
+          }
+        </div>`;}).join(''):''}
+      ${!S.driveLoading&&!S.driveLoaded?`<div style="padding:10px 16px 14px;font-size:12px;color:var(--color-text-tertiary)">Browse your Google Drive to import files directly into this event.</div>`:''}
+    </div>
+
+    <div class="section-card">
+      <div class="sec-hdr">
+        <div class="sec-hdr-left">
+          <div class="sec-icon" style="background:#EEEDFE"><i class="ti ti-files" style="color:#7F77DD" aria-hidden="true"></i></div>
+          <span class="sec-title">${activeSub?activeSub.name+' files':'Event files'}</span>
+        </div>
+        <span class="sec-count">${dispFiles.length} file${dispFiles.length!==1?'s':''}</span>
+      </div>
+      <label class="upload-area" ondragover="event.preventDefault();this.classList.add('dov')" ondragleave="this.classList.remove('dov')" ondrop="hDrop(event,'${eid}','${sid}')">
+        <input type="file" multiple onchange="hFileInput(this,'${eid}','${sid}')">
+        <i class="ti ti-cloud-upload" aria-hidden="true"></i>
+        <p>Drop files here or click to upload</p>
+        <small>Any file type supported</small>
+      </label>
+      ${dispFiles.map(f=>{const ft=fType(f.name);return`
+        <div class="file-row" onclick="openPreview(${JSON.stringify({id:f.id,name:f.name,size:f.size,objUrl:f.objUrl||null,driveUrl:f.driveUrl||null}).replace(/"/g,'&quot;')})">
+          <div class="file-thumb" style="background:${ft.bg}"><i class="ti ${ft.icon}" style="color:${ft.ic}" aria-hidden="true"></i></div>
+          <div class="file-inf">
+            <div class="file-nm">${f.name}${f.fromDrive?' <i class="ti ti-brand-google-drive" style="font-size:11px;color:#3B6D11;vertical-align:-1px" aria-hidden="true"></i>':''}</div>
+            <div class="file-mt">${fmtSz(f.size)} · ${fmtDt(f.uploaded)}</div>
+          </div>
+          <div class="file-acts">
+            <div class="fa-btn" onclick="event.stopPropagation();openPreview(${JSON.stringify({id:f.id,name:f.name,size:f.size,objUrl:f.objUrl||null,driveUrl:f.driveUrl||null}).replace(/"/g,'&quot;')})" title="Preview" role="button" aria-label="Preview"><i class="ti ti-eye" aria-hidden="true"></i></div>
+            <div class="fa-btn fa-del" onclick="event.stopPropagation();delFile('${eid}','${sid}','${f.id}')" title="Delete" role="button" aria-label="Delete"><i class="ti ti-trash" aria-hidden="true"></i></div>
+          </div>
+        </div>`;}).join('')}
+    </div>`;
+}
+
+function renderTimeline(){
+  const div=document.getElementById('tlView');
+  div.style.display='block';
+  document.getElementById('emptyEl').style.display='none';
+  document.getElementById('evView').style.display='none';
+  if(!S.evs.length){
+    div.innerHTML=`<div class="empty-wrap" style="min-height:300px"><div class="empty-icon-wrap"><i class="ti ti-timeline" aria-hidden="true"></i></div><p>No events yet</p></div>`;
+    return;
+  }
+  const sorted=[...S.evs].sort((a,b)=>a.created-b.created);
+  const byY={};sorted.forEach(ev=>{const y=new Date(ev.created).getFullYear();if(!byY[y])byY[y]=[];byY[y].push(ev);});
+  div.innerHTML=`<div class="tl-wrap">${Object.entries(byY).map(([yr,evs],yi)=>`
+    <div class="tl-yr">${yr}</div>
+    ${evs.map((ev,i)=>{
+      const sc=statusCfg(ev.status);
+      const idx=ev.colorIdx??0;
+      const c=evColor(idx);
+      const totalF=ev.files.length+ev.subs.reduce((a,s)=>a+s.files.length,0);
+      const isLast=(yi===Object.keys(byY).length-1)&&(i===evs.length-1);
+      return`<div class="tl-row">
+        <div class="tl-dt">${fmtDtSh(ev.created)}</div>
+        <div class="tl-spine">
+          <div class="tl-dot" style="background:${sc.dot}"></div>
+          ${!isLast?`<div class="tl-line"></div>`:''}
+        </div>
+        <div class="tl-card" onclick="selEv('${ev.id}')">
+          <div class="tl-card-hdr">
+            <div class="tl-ev-avatar" style="background:${c.bg}"><i class="ti ${evIcon(idx)}" style="color:${c.ic}" aria-hidden="true"></i></div>
+            <span class="tl-title">${ev.name}</span>
+            <span class="tl-status ${sc.cls}">${sc.lbl}</span>
+          </div>
+          <div class="tl-meta-row">
+            <span><i class="ti ti-files" aria-hidden="true"></i>${totalF} file${totalF!==1?'s':''}</span>
+            <span><i class="ti ti-folder" aria-hidden="true"></i>${ev.subs.length} sub-event${ev.subs.length!==1?'s':''}</span>
+            <span><i class="ti ti-calendar" aria-hidden="true"></i>${fmtDt(ev.created)}</span>
+          </div>
+          ${ev.subs.length?`<div class="tl-chips">${ev.subs.map(s=>`<span class="tl-chip">${s.name} (${s.files.length})</span>`).join('')}</div>`:''}
+        </div>
+      </div>`;}).join('')}`).join('')}</div>`;
+}
+
+function render(){
+  renderSidebar();
+  if(document.getElementById('srch').value.trim())return;
+  document.getElementById('srchView').style.display='none';
+  if(S.view==='timeline'){
+    document.getElementById('evView').style.display='none';
+    document.getElementById('emptyEl').style.display='none';
+    renderTimeline();return;
+  }
+  document.getElementById('tlView').style.display='none';
+  if(!S.activeEv){
+    document.getElementById('emptyEl').style.display='flex';
+    document.getElementById('emptyEl').innerHTML=`<div class="empty-wrap"><div class="empty-icon-wrap"><i class="ti ti-calendar-event" aria-hidden="true"></i></div><p>Create your first event to get started</p><button class="new-btn" onclick="openModal('ev')" style="margin-top:4px"><i class="ti ti-plus" aria-hidden="true"></i>New event</button></div>`;
+    document.getElementById('evView').style.display='none';
+  }else{
+    document.getElementById('emptyEl').style.display='none';
+    renderEvView();
+  }
+}
+
+const NOW=Date.now();
+function seed(){
+  const e1={id:uid(),name:'Delhi wedding trip',status:'progress',subs:[],files:[],created:NOW-86400000*12,colorIdx:0};
+  e1.files=[{id:uid(),name:'Invitation_card.pdf',size:245000,uploaded:NOW-86400000*10},{id:uid(),name:'Guest_list.xlsx',size:38000,uploaded:NOW-86400000*8}];
+  e1.subs=[
+    {id:uid(),name:'Flight booking',files:[{id:uid(),name:'IndiGo_DEL_ticket.pdf',size:125000,uploaded:NOW-86400000*11},{id:uid(),name:'Return_receipt.pdf',size:98000,uploaded:NOW-86400000*9}]},
+    {id:uid(),name:'Hotel stay',files:[{id:uid(),name:'Taj_Hotel_confirmation.pdf',size:210000,uploaded:NOW-86400000*7}]},
+    {id:uid(),name:'Ceremony day',files:[]},
+    {id:uid(),name:'Train tickets',files:[{id:uid(),name:'IRCTC_ticket.pdf',size:88000,uploaded:NOW-86400000*6}]}
+  ];
+  const e2={id:uid(),name:'Pre-wedding shoot',status:'done',subs:[],files:[],created:NOW-86400000*22,colorIdx:1};
+  e2.files=[{id:uid(),name:'Photographer_contract.pdf',size:190000,uploaded:NOW-86400000*20}];
+  e2.subs=[
+    {id:uid(),name:'Location scouting',files:[{id:uid(),name:'Lodhi_garden_permit.pdf',size:62000,uploaded:NOW-86400000*21}]},
+    {id:uid(),name:'Outfit selection',files:[{id:uid(),name:'Dress_references.jpg',size:2100000,uploaded:NOW-86400000*19}]}
+  ];
+  const e3={id:uid(),name:'Mehendi & sangeet',status:'pending',subs:[],files:[],created:NOW-86400000*5,colorIdx:2};
+  e3.subs=[{id:uid(),name:'Mehendi artist',files:[]},{id:uid(),name:'Music & DJ',files:[]}];
+  S.evs.push(e2,e1,e3);
+  S.activeEv=e1.id;
+}
+seed();render();
+</script>
