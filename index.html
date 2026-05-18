@@ -795,7 +795,12 @@ async function fetchEvents() {
   if (error) {
     console.error('Error fetching events:', error);
   } else if (data) {
-    S.evs = data.map(row => row.data);
+    S.evs = data.map(row => {
+      const ev = row.data || {};
+      ev.files = ev.files || [];
+      ev.subs = ev.subs || [];
+      return ev;
+    });
     if(S.evs.length > 0 && !S.activeEv) S.activeEv = S.evs[0].id;
   }
   render();
